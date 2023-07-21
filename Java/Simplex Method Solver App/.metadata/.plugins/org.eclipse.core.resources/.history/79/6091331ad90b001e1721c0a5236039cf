@@ -1,0 +1,116 @@
+package ui;
+
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+
+import simplexSolver.ProbInitializer;
+import simplexSolver.Problem;
+import simplexSolver.RevisedSimplexSolver;
+/**
+ * This is the user interface of the program.
+ */
+public class ProblemSolverUI {
+    private JFrame frame;
+    private JPanel mainPanel;
+    private JPanel textPanel;
+    private JButton loadButton;
+    private JButton solveButton;
+    private Problem ogProblem;
+    private Problem stdProblem;
+    private JTextArea ogProblemInfo;
+    private JTextArea stdProblemInfo;
+
+    public ProblemSolverUI() {
+        frame = new JFrame("Problem Solver");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+
+        mainPanel = new JPanel(new GridLayout(3, 1, 10, 10)); // 3 rows, 1 column, 10px horizontal and vertical gap
+        textPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+
+        ogProblemInfo = new JTextArea();
+        stdProblemInfo = new JTextArea();
+        ogProblemInfo.setEditable(false);
+        stdProblemInfo.setEditable(false);
+        JScrollPane ogScrollPane = new JScrollPane();
+        ogScrollPane.add(ogProblemInfo);
+        JScrollPane stdScrollPane = new JScrollPane();
+        stdScrollPane.add(stdProblemInfo);
+        loadButton = new JButton("Load");
+        loadButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                int result = fileChooser.showOpenDialog(frame);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+                    ogProblem = ProbInitializer.initialize(filePath);
+                    String output = "";
+                    output += "Original Problem: \n";
+                    output += ogProblem.toString();
+                    ogProblemInfo.setText(output);
+                    output = "";
+                    output += "Standardized Problem: \n";
+                    stdProblem = ProbInitializer.convertToStandardForm(ogProblem);
+                    output += stdProblem.toString();
+                    stdProblemInfo.setText(output);
+                }
+            }
+        });
+
+        solveButton = new JButton("Solve");
+        solveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                RevisedSimplexSolver solver = new RevisedSimplexSolver(stdProblem);
+                // TODO check if problem exists
+                solver.solve();
+                if (solver.getStatus() == 1) {
+                    JOptionPane.showMessageDialog(null, solver.getSolutionInfo(), "Solution found",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } else if (solver.getStatus() == -1) {
+                    JOptionPane.showMessageDialog(null, "The problem is unbounded.", "Could not find solution",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+
+ 
+
+        mainPanel.add(loadButton);
+        mainPanel.add(solveButton);
+        textPanel.add(ogProblemInfo);
+        textPanel.add(stdProblemInfo);
+        mainPanel.add(textPanel);
+        frame.add(mainPanel);
+        frame.setVisible(true);
+    }
+
+/*     public void goBack() {
+        if (!stepStack.isEmpty()) { // Check if stack is not empty
+            stepStack.pop(); // Pop the current step from the stack
+            if (!stepStack.isEmpty()) { // Check if there's a previous step
+                ProblemStep previousStep = stepStack.peek(); // Peek at the previous step
+                // TODO: Show the previous step in the UI
+            }
+        }
+    }
+    public void goNext() {
+        if (!stepStack.isEmpty()) { // Check if stack is not empty
+            stepStack.pop(); // Pop the current step from the stack
+            if (!stepStack.isEmpty()) { // Check if there's a next step
+                ProblemStep nextStep = stepStack.peek(); // Peek at the next step
+                // TODO: Show the next step in the UI
+            }
+        }
+    } */
+}

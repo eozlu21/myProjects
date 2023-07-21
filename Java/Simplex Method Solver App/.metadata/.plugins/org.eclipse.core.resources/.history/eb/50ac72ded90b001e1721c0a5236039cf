@@ -1,0 +1,142 @@
+package simplexSolver;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+
+import matrix.Matrix;
+/***
+ * This class parses the problem from the file and helps the program output both the original and the standardized problem.
+ */
+public class ProbInitializer {
+
+	public static Problem initialize(String outputFile) {
+		Problem problem = new Problem();
+
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(outputFile));
+
+			// Read the objective function
+			String line = reader.readLine();
+			String[] tokens = line.split(" ");
+			double[] objective = new double[tokens.length - 1];
+			for (int i = 1; i < tokens.length; i++) {
+				objective[i - 1] = Double.parseDouble(tokens[i]);
+			}
+			if (tokens[0].equals("min")) {
+				problem.direction = "min";
+			} else if (tokens[0].equals("max")) {
+				problem.direction = "max";
+			}
+			problem.objective = objective;
+
+			// Read the constraints
+			String[] constraintTokens;
+			while ((line = reader.readLine()) != null) {
+				constraintTokens = line.split(" ");
+				double[] constraintCoeffs = new double[constraintTokens.length - 2];
+				for (int i = 0; i < constraintCoeffs.length; i++) {
+					constraintCoeffs[i] = Double.parseDouble(constraintTokens[i]);
+				}
+
+				String sense = constraintTokens[constraintTokens.length - 2];
+				double rhs = Double.parseDouble(constraintTokens[constraintTokens.length - 1]);
+
+				if (sense.equals("e")) {
+					problem.addConstraint(constraintCoeffs, "=", rhs);
+				} else if (sense.equals("g")) {
+					problem.addConstraint(constraintCoeffs, ">=", rhs);
+				} else if (sense.equals("l")) {
+					problem.addConstraint(constraintCoeffs, "<=", rhs);
+				}
+			}
+
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return problem;
+	}
+
+public static Problem convertToStandardForm(Problem problem) {
+    int numVariables = problem.getNumVariables();
+    int numConstraints = problem.getNumConstraints();
+    double[][] constraints = problem.getConstraints();
+    String[] senses = problem.getSenses().clone();
+    double[] rhs = problem.getRhsAsCol();
+	int initialNumConstraints = numConstraints;
+
+    // Convert senses and constraints
+    for (int i = 0; i < initialNumConstraints; i++) {
+        if (problem.getSenses()[i].equals(">=")) {
+            rhs[i] *= -1; 
+            for (int j = 0; j < numVariables; j++) {
+                constraints[i][j] *= -1; 
+            }
+            senses[i] = "="; 
+        }
+        if (problem.getSenses()[i].equals("=")) {
+            double[] newConstraint = Arrays.copyOf(constraints[i], numVariables + numConstraints);
+            newConstraint[numVariables + i] = -1; 
+            constraints[i] = newConstraint;
+            senses[i] = "="; 
+			double[] newConstraint2 = new double[numVariables + numConstraints];
+			for (int j = 0; j < newConstraint2.length; j++) {
+				newConstraint2[j] = -1*constraints[i][j];
+			}
+
+            newConstraint2[numVariables + i] = 1; 
+            constraints = Arrays.copyOf(constraints, numConstraints + 1);
+            constraints[numConstraints] = newConstraint2;
+            senses = Arrays.copyOf(senses, numConstraints + 1);
+            senses[numConstraints] = "="; 
+
+            double[] newRhs = Arrays.copyOf(rhs, numConstraints + 1);
+            newRhs[numConstraints] = -1*rhs[i]; 
+            rhs = newRhs;
+
+            numConstraints++; 
+        }
+    }
+
+    // Add slack variables to each constraint
+    double[][] newConstraints = new double[numConstraints][numVariables + numConstraints];
+    for (int i = 0; i < numConstraints; i++) {
+        for (int j = 0; j < numVariables; j++) {
+            newConstraints[i][j] = constraints[i][j];
+        }
+        newConstraints[i][numVariables + i] = 1;
+    }
+
+	// Update objective function
+	double[] objective = Arrays.copyOf(problem.getObjectiveAsRow(), numVariables + numConstraints);
+
+	// Multiply objective coefficients by -1 if direction is "min"
+	boolean dirChanged = false;
+	if (problem.getDirection().equals("min")) {
+		dirChanged = true;
+		for (int i = 0; i < objective.length; i++) {
+			objective[i] *= -1;
+		}
+	}
+
+    return new Problem(objective, newConstraints, senses, rhs, numConstraints, numConstraints, dirChanged);
+}
+
+	
+
+	public static String[] addElementToArray(String[] array, String element) {
+		String[] newArray = Arrays.copyOf(array, array.length + 1);
+		newArray[newArray.length - 1] = element;
+		return newArray;
+	}
+
+	public static double[] addElementToArray(double[] array, double element) {
+		double[] newArray = Arrays.copyOf(array, array.length + 1);
+		newArray[newArray.length - 1] = element;
+		return newArray;
+	}
+
+}

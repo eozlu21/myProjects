@@ -1,0 +1,389 @@
+package matrix;
+
+import java.util.Arrays;
+
+/**
+ * The only purpose of this class is to ease the matrix operations for the
+ * simplex method.
+ */
+public class Matrix {
+	private double[][] data;
+	private int rows; // Number of rows
+	private int cols; // Number of columns
+
+	public Matrix(double[][] data) {
+		this.data = data;
+		this.rows = data.length;
+		this.cols = data[0].length;
+	}
+
+	public Matrix(double[] column) {
+		this.data = new double[column.length][1];
+		for (int i = 0; i < column.length; i++) {
+			this.data[i][0] = column[i];
+		}
+		this.rows = column.length;
+		this.cols = 1;
+	}
+
+	public Matrix(Matrix matrix) {
+		this.data = matrix.getData();
+		this.rows = matrix.getData().length;
+		this.cols = matrix.getData()[0].length;
+	}
+
+	public int getRows() {
+		return rows;
+	}
+
+	public int getCols() {
+		return cols;
+	}
+
+	public double[][] getData() {
+		return data;
+	}
+
+	public Matrix multiply(Matrix other) {
+		if (this.cols != other.rows) {
+			throw new IllegalArgumentException("Matrix dimensions do not match for multiplication");
+		}
+
+		double[][] result = new double[this.rows][other.cols];
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < other.cols; j++) {
+				for (int k = 0; k < this.cols; k++) {
+					result[i][j] += this.data[i][k] * other.data[k][j];
+				}
+			}
+		}
+
+		return new Matrix(result);
+	}
+
+	public Matrix inverse() {
+		if (this.rows != this.cols) {
+			throw new IllegalArgumentException("Matrix is not square, cannot compute inverse");
+		}
+
+		double[][] result = new double[this.rows][this.cols];
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				result[i][j] = (i == j) ? 1.0 : 0.0;
+			}
+		}
+
+		double[][] temp = this.data.clone();
+		for (int k = 0; k < this.rows; k++) {
+			double pivot = temp[k][k];
+
+			for (int j = 0; j < this.cols; j++) {
+				temp[k][j] /= pivot;
+				result[k][j] /= pivot;
+			}
+
+			for (int i = 0; i < this.rows; i++) {
+				if (i != k) {
+					double factor = temp[i][k];
+					for (int j = 0; j < this.cols; j++) {
+						temp[i][j] -= factor * temp[k][j];
+						result[i][j] -= factor * result[k][j];
+					}
+				}
+			}
+		}
+
+		return new Matrix(result);
+	}
+
+	public double[] multiplyVector(double[] vector) {
+		if (vector.length != this.cols) {
+			throw new IllegalArgumentException("Vector dimension does not match matrix dimension for multiplication");
+		}
+
+		double[] result = new double[this.rows];
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				result[i] += this.data[i][j] * vector[j];
+			}
+		}
+
+		return result;
+	}
+
+	public void print() {
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				System.out.print(this.data[i][j] + " ");
+			}
+			System.out.println();
+		}
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				sb.append(this.data[i][j]).append(" ");
+			}
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+
+	public static Matrix getIdentityMatrix(int n) {
+		double[][] data = new double[n][n];
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				data[i][j] = (i == j) ? 1.0 : 0.0;
+			}
+		}
+		return new Matrix(data);
+	}
+
+	public Matrix getColumnAsMatrix(int n) {
+		if (n < 0 || n >= this.cols) {
+			throw new IllegalArgumentException("Invalid column index");
+		}
+
+		double[][] columnData = new double[this.rows][1];
+		for (int i = 0; i < this.rows; i++) {
+			columnData[i][0] = this.data[i][n];
+		}
+
+		return new Matrix(columnData);
+	}
+
+	public Matrix add(Matrix other) {
+		if (this.rows != other.rows || this.cols != other.cols) {
+			throw new IllegalArgumentException("Matrix dimensions do not match for addition");
+		}
+
+		double[][] result = new double[this.rows][this.cols];
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				result[i][j] = this.data[i][j] + other.data[i][j];
+			}
+		}
+
+		return new Matrix(result);
+	}
+
+	public Matrix subtract(Matrix other) {
+		if (this.rows != other.rows || this.cols != other.cols) {
+			throw new IllegalArgumentException("Matrix dimensions do not match for subtraction");
+		}
+
+		double[][] result = new double[this.rows][this.cols];
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				result[i][j] = this.data[i][j] - other.data[i][j];
+			}
+		}
+
+		return new Matrix(result);
+	}
+
+	// Method to find the minimum entry in the matrix along with its coordinates as
+	// a Coordinate object
+	public int findMinColWithCoordinates() {
+		int cols = getCols();
+		double minValue = Double.MAX_VALUE;
+		int minCol = -1;
+
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				if (getData()[i][j] < minValue) {
+					minValue = getData()[i][j];
+					minCol = j;
+				}
+			}
+		}
+
+		if (minCol == -1) {
+			throw new IllegalArgumentException("Matrix is empty");
+		}
+		if (minValue > 0) {
+			return -1;
+		}
+		return minCol;
+	}
+
+	public int findMinColWithCoordinatesNonNegative(Matrix matrix) {
+		int rows = matrix.getRows();
+		int cols = matrix.getCols();
+		double minValue = Double.MAX_VALUE;
+		int minRow = -1;
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				double value = matrix.getData()[i][j];
+				if (value >= 0 && value < minValue) { // Consider only non-negative entries
+					minValue = value;
+					minRow = i;
+				}
+			}
+		}
+
+		if (minRow == -1) {
+			return -1;
+		}
+		return minRow;
+	}
+
+	public Matrix elementWiseDivide(Matrix other) {
+		if (this.getRows() != other.getRows() || this.getCols() != other.getCols()) {
+			throw new IllegalArgumentException("Matrices must have the same dimensions for element-wise division");
+		}
+
+		Matrix result = new Matrix(new double[getRows()][getCols()]); // Create a new matrix with the same dimensions
+		for (int i = 0; i < this.getRows(); i++) {
+			for (int j = 0; j < this.getCols(); j++) {
+				if (other.getData()[i][j] == 0) {
+					result.getData()[i][j] = Double.MAX_VALUE;
+				} else {
+					result.getData()[i][j] = this.getData()[i][j] / other.getData()[i][j]; // Perform element-wise
+																							// division
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public void replaceColumn(Matrix column, int index) {
+		// Check if the column index is valid
+		if (index < 0 || index >= data[0].length) {
+			throw new IllegalArgumentException("Invalid column index");
+		}
+
+		// Check if the number of rows in the matrix is the same as the number of rows
+		// in the column matrix
+		if (data.length != column.getRows()) {
+			throw new IllegalArgumentException("Column size mismatch");
+		}
+
+		// Replace the column
+		for (int i = 0; i < data.length; i++) {
+			data[i][index] = column.getData()[i][0];
+		}
+	}
+
+	public Matrix transpose() {
+		int rows = data.length;
+		int cols = data[0].length;
+		double[][] transposeData = new double[cols][rows];
+
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				transposeData[j][i] = data[i][j];
+			}
+		}
+
+		return new Matrix(transposeData);
+	}
+
+	public double[] asVector() {
+		if (this.getRows() == 1 || this.getCols() == 1) {
+			int size = Math.max(this.getRows(), this.getCols());
+			double[] vector = new double[size];
+			if (this.getRows() == 1) {
+				for (int i = 0; i < size; i++) {
+					vector[i] = this.getData()[0][i];
+				}
+			} else {
+				for (int i = 0; i < size; i++) {
+					vector[i] = this.getData()[i][0];
+				}
+			}
+			return vector;
+		} else {
+			throw new IllegalStateException("Matrix is not a vector.");
+		}
+	}
+
+	public Matrix getColumns(int a, int b) {
+		if (a < 0 || b >= this.cols || a > b) {
+			throw new IllegalArgumentException("Invalid column range");
+		}
+
+		int numColumns = b - a + 1;
+		double[][] columnData = new double[this.rows][numColumns];
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = a; j <= b; j++) {
+				columnData[i][j - a] = this.data[i][j];
+			}
+		}
+
+		return new Matrix(columnData);
+	}
+
+	public int[] getIdentityColumnIndices() {
+		int[] identityColumns = new int[this.getCols()];
+		for (int col = 0; col < this.getCols(); col++) {
+			boolean isIdentity = true;
+			for (int row = 0; row < this.getRows(); row++) {
+				if (row == col && this.getData()[row][col] != 1) {
+					isIdentity = false;
+					break;
+				} else if (row != col && this.getData()[row][col] != 0) {
+					isIdentity = false;
+					break;
+				}
+			}
+			if (isIdentity) {
+				identityColumns[col] = col;
+			}
+		}
+		return identityColumns;
+	}
+
+	public Matrix hstack(Matrix other) {
+		if (this.rows != other.rows) {
+			throw new IllegalArgumentException("Matrix dimensions do not match for horizontal stack");
+		}
+
+		double[][] resultData = new double[this.rows][this.cols + other.cols];
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				resultData[i][j] = this.data[i][j];
+			}
+			for (int j = 0; j < other.cols; j++) {
+				resultData[i][this.cols + j] = other.data[i][j];
+			}
+		}
+
+		return new Matrix(resultData);
+	}
+
+	public Matrix vstack(Matrix other) {
+		if (this.cols != other.cols) {
+			throw new IllegalArgumentException("Matrix dimensions do not match for vertical stack");
+		}
+
+		double[][] resultData = new double[this.rows + other.rows][this.cols];
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				resultData[i][j] = this.data[i][j];
+			}
+		}
+		for (int i = 0; i < other.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				resultData[this.rows + i][j] = other.data[i][j];
+			}
+		}
+
+		return new Matrix(resultData);
+	}
+
+	public Matrix scalarMultiply(double scalar) {
+    double[][] result = new double[this.rows][this.cols];
+    for (int i = 0; i < this.rows; i++) {
+        for (int j = 0; j < this.cols; j++) {
+            result[i][j] = this.data[i][j] * scalar;
+        }
+    }
+    return new Matrix(result);
+}
+
+}

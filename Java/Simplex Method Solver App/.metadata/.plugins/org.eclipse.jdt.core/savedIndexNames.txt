@@ -1,0 +1,4 @@
+INDEX VERSION 1.131+/Users/egeozlu/Documents/Koc Courses/Spring 2023/INDR 262/Simplex Method Solver App/.metadata/.plugins/org.eclipse.jdt.core
+3445091621.index
+1865797976.index
+534845572.index

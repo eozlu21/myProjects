@@ -1,0 +1,162 @@
+package simplexSolver;
+
+public class Problem {
+
+	protected double[] objective;
+	protected double[][] constraints;
+	protected String[] senses;
+	protected double[] rhs;
+	protected String direction;
+	protected int artificialCount;
+	protected int slackCount;
+	protected boolean dirChanged;
+
+	/***
+	 * This is where the relevant data for the problem is stored and retrieved.
+	 */
+	public Problem() {
+		objective = null;
+		constraints = new double[0][];
+		senses = new String[0];
+		rhs = new double[0];
+	}
+
+	public Problem(double[] objective2, double[][] constraints2, String[] senses2, double[] rhs2, int artificialCount,
+			int slackCount2, boolean dirChanged2) {
+		objective = objective2;
+		constraints = constraints2;
+		senses = senses2;
+		rhs = rhs2;
+		direction = "max";
+		this.artificialCount = artificialCount;
+		this.slackCount = slackCount2;
+		dirChanged = dirChanged2;
+	}
+
+	public double[][] getObjective() {
+		double[][] objectiveArray = new double[1][];
+		objectiveArray[0] = objective;
+		return objectiveArray;
+	}
+
+	public double[] getObjectiveAsRow() {
+		return objective;
+	}
+
+	public double[][] getRhs() {
+		double[][] rhsArray = new double[rhs.length][1];
+		for (int i = 0; i < rhs.length; i++) {
+			rhsArray[i][0] = rhs[i];
+		}
+		return rhsArray;
+	}
+
+	public double[] getRhsAsCol() {
+		return rhs;
+	}
+
+	public void setObjective(double[] objective) {
+		this.objective = objective;
+	}
+
+	public double[][] getConstraints() {
+		return constraints;
+	}
+
+	public void setConstraints(double[][] constraints) {
+		this.constraints = constraints;
+	}
+
+	public String[] getSenses() {
+		return senses;
+	}
+
+	public void setSenses(String[] senses) {
+		this.senses = senses;
+	}
+
+	public void setRhs(double[] rhs) {
+		this.rhs = rhs;
+	}
+
+	public String getDirection() {
+		return direction;
+	}
+
+	public void setDirection(String direction) {
+		this.direction = direction;
+	}
+
+	public void addConstraint(double[] coeffs, String sense, double rhsValue) {
+		int numRows = constraints.length;
+		int numCols = coeffs.length;
+
+		double[][] newConstraints = new double[numRows + 1][numCols];
+		for (int i = 0; i < numRows; i++) {
+			for (int j = 0; j < numCols; j++) {
+				newConstraints[i][j] = constraints[i][j];
+			}
+		}
+		for (int j = 0; j < numCols; j++) {
+			newConstraints[numRows][j] = coeffs[j];
+		}
+		constraints = newConstraints;
+
+		String[] newSenses = new String[numRows + 1];
+		for (int i = 0; i < numRows; i++) {
+			newSenses[i] = senses[i];
+		}
+		newSenses[numRows] = sense;
+		senses = newSenses;
+
+		double[] newRhs = new double[numRows + 1];
+		for (int i = 0; i < numRows; i++) {
+			newRhs[i] = rhs[i];
+		}
+		newRhs[numRows] = rhsValue;
+		rhs = newRhs;
+	}
+
+	public int getNumVariables() {
+		if (objective == null) {
+			return 0;
+		} else {
+			return objective.length;
+		}
+	}
+
+	public int getNumConstraints() {
+		return constraints.length;
+	}
+	// Used in user interface
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		// Objective function
+		sb.append(direction).append("imize ").append(dirChanged ? "-" : "").append("Z = ");
+		for (int i = 0; i < objective.length; i++) {
+				sb.append(
+						(objective[i] >= 0 ? "+" + objective[i] : (objective[i])) + "x" + (i + 1) + " ");
+			
+		}
+		sb.append("\nSubject to:\n");
+
+		// Constraints
+		for (int i = 0; i < constraints.length; i++) {
+			for (int j = 0; j < constraints[i].length; j++) {
+				sb.append(
+						(constraints[i][j] >= 0 ? "+" + constraints[i][j] : (constraints[i][j])) + "x" + (j + 1) + " ");
+			}
+			sb.append(senses[i] + " " + rhs[i] + "\n");
+		}
+
+		// Non-negative variables
+		sb.append("x1");
+		for (int i = 1; i < objective.length; i++) {
+			sb.append(", x" + (i + 1));
+		}
+		sb.append(" >= 0");
+
+		return sb.toString();
+	}
+}
