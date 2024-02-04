@@ -11,7 +11,11 @@ GameObject:
   - component: {fileID: 3035213382323303018}
   - component: {fileID: 1781712016962099175}
   - component: {fileID: 2907460179225432085}
-  m_Layer: 0
+  - component: {fileID: -2142832022892938878}
+  - component: {fileID: 147610288398049823}
+  - component: {fileID: -4477137302551115900}
+  - component: {fileID: 2020203814214417700}
+  m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -76,6 +80,106 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e0d5c1416c7b4e0f9045f30af46ccc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveSpeed: 10
+  paddingLeft: 0.5
+  paddingRight: 0.5
+  paddingTop: 5
+  paddingBottom: 2
+--- !u!114 &-2142832022892938878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5169203720204544535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be45003f12931445888baa81cd988211, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 50
+--- !u!58 &147610288398049823
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5169203720204544535}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: -0.004135132, y: -0.024810791}
+  serializedVersion: 2
+  m_Radius: 0.33873004
+--- !u!50 &-4477137302551115900
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5169203720204544535}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!114 &2020203814214417700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5169203720204544535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c929823f66e44a3a98ae237fbd5f606, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  projectilePrefab: {fileID: 3121081755925921943, guid: 785112162468e4eeca628918d10c881e, type: 3}
+  projectileSpeed: 10
+  projectileLifespan: 5
+  fireRatePerSecond: 10
+  useAI: 0
+  AiFireRateVar: 0.5
+  AiFireRateMean: 1.5
+  isFiring: 0
 --- !u!1 &7668359516910827929
 GameObject:
   m_ObjectHideFlags: 0
@@ -86,7 +190,7 @@ GameObject:
   m_Component:
   - component: {fileID: 193514077549784359}
   - component: {fileID: 746559312349271838}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: playerShip2_blue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -148,7 +252,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: dc687f02ea36047fab5cadabdbe4c14b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

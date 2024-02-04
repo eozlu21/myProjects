@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,14 +6,21 @@ using UnityEngine;
 public class Pathfinder : MonoBehaviour
 {
 
-    [SerializeField] private WaveConfigSO waveConfig;
-
+    private WaveConfigSO waveConfig;
+    private EnemySpawner enemySpawner;
     private List<Transform> waypoints;
 
     private int waypointIndex = 0;
     // Start is called before the first frame update
+
+    private void Awake()
+    {
+        enemySpawner = FindObjectOfType<EnemySpawner>();
+    }
+
     void Start()
     {
+        waveConfig = enemySpawner.GetCurrentWave();
         waypoints = waveConfig.GetWaypoints();
         transform.position = waveConfig.GetStartingWaypoint().position;
     }

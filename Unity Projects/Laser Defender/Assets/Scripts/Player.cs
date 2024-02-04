@@ -13,6 +13,12 @@ public class Player : MonoBehaviour
     [SerializeField] private float paddingRight;
     [SerializeField] private float paddingTop;
     [SerializeField] private float paddingBottom;
+    private Shooter shooter;
+
+    private void Awake()
+    {
+        shooter = GetComponent<Shooter>();
+    }
 
     private void Start()
     {
@@ -34,15 +40,26 @@ public class Player : MonoBehaviour
     {
         Vector2 delta = rawInput * (moveSpeed * Time.deltaTime);
         Vector2 newPos = new Vector2();
-        newPos.x = Mathf.Clamp(transform.position.x + delta.x ,minBounds.x + paddingLeft, maxBounds.x - paddingRight);
-        newPos.y = Mathf.Clamp(transform.position.y + delta.y ,minBounds.y + paddingBottom, maxBounds.y - paddingTop);
-        transform.position = newPos;
-
+        var position = transform.position;
+        newPos.x = Mathf.Clamp(position.x + delta.x ,minBounds.x + paddingLeft, maxBounds.x - paddingRight);
+        newPos.y = Mathf.Clamp(position.y + delta.y ,minBounds.y + paddingBottom, maxBounds.y - paddingTop);
+        position = newPos;
+        transform.position = position;
     }
 
     void OnMove(InputValue value)
     {
         rawInput = value.Get<Vector2>();
-        Debug.Log(rawInput);
+    }
+
+    void OnFire(InputValue value)
+    {
+        if (shooter == null)
+        {
+            return;
+        }
+
+        shooter.isFiring = value.isPressed;
+       
     }
 }
