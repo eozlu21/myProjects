@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+application {
+    // Fully qualified name of the main class
+    mainClass = 'org.LanceOfDestiny.GameViewTest'
+}
+
+jar {
+    manifest {
+        attributes(
+                // Use get() to retrieve the mainClass property
+                'Main-Class': application.mainClass.get()
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    implementation 'mysql:mysql-connector-java:8.0.28' // Use the latest version available
+    implementation 'org.apache.logging.log4j:log4j-core:2.14.1'
+}
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.release = 18
+}
+
+
+test {
+    useJUnitPlatform()
+}
